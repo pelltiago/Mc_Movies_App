@@ -1,44 +1,31 @@
 package com.example.imdbapp.ui.view
 
-import android.graphics.Movie
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import com.example.imdbapp.R
-import com.example.imdbapp.data.model.MovieFavModel
-import com.example.imdbapp.data.model.Results
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.room.Room
+import com.example.imdbapp.data.room.DBMovies
+import com.example.imdbapp.data.room.MovieRoom
 import com.example.imdbapp.databinding.ActivityFavsBinding
-import com.example.imdbapp.databinding.ActivityMainBinding
 import com.example.imdbapp.ui.FavsAdapter
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
+import kotlinx.coroutines.runBlocking
 
 class FavsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFavsBinding
-                private val list: ArrayList<Any> = arrayListOf()
-private val favList: MutableList<MovieFavModel>? = null
+    private lateinit var room: DBMovies
+    private var listMoviesFav: List<MovieRoom>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityFavsBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+        room = Room.databaseBuilder(this, DBMovies::class.java, "MovieRoom").build()
+       runBlocking {
+            listMoviesFav = room.daoMovie().getMoviesRoom()
+        }
 
-        val db = FirebaseFirestore.getInstance()
-
-        db.collection("users").document(intent.getStringExtra("userMail")!!).collection("moviesFav").document("OcZj9JZTzX4AqlTdIUQW")
-            .get().addOnSuccessListener {
-
-
-                    Log.e("peli", it.toString())
-                    list.add(it.get("title") as String)
-                    list.add(it.get("posterPath") as String)
-                    Log.e("EL BUENO", list.toString())
-                    Log.e("EL BUENO2", list.first().toString())
-
-
-        binding.rvFavs.adapter = favList?.let { FavsAdapter(this,
-            list.toList() as List<MovieFavModel>
-        ) }
-            }
+        binding.rvFavs.layoutManager = LinearLayoutManager(this)
+        binding.rvFavs.adapter = listMoviesFav?.let { FavsAdapter(this, it) }
     }
 }

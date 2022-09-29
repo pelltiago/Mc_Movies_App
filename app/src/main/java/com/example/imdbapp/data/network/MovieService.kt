@@ -14,14 +14,12 @@ class MovieService {
     suspend fun getMovies(): MovieResponse? {
         return withContext(Dispatchers.IO) {
             val response = retrofit.create(MovieApiClient::class.java).getAllMovies()
-            Log.e("log get all movies", response.body().toString())
             response.body()
         }
     }
     suspend fun searchMovies(name : String): MovieResponse? {
         return withContext(Dispatchers.IO) {
             val response = retrofitSearch.create(MovieApiClient::class.java).searchMovies(name)
-            Log.e("log search", response.body().toString())
             response.body()
         }
     }

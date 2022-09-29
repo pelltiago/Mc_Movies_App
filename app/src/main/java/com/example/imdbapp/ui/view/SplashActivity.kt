@@ -18,14 +18,7 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun mainNavigation() {
-        val sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE)
-        val email = sharedPreferences.getString("email", null)
-        if (email.isNullOrEmpty()) {
-            val loginIntent = Intent(this, LoginActivity::class.java)
-            startActivity(loginIntent)
-        } else {
             val mainIntent = Intent(this, MainActivity::class.java)
             startActivity(mainIntent)
         }
     }
-}

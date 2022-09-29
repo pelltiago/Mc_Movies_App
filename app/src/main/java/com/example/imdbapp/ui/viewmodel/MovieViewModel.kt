@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.imdbapp.data.domain.GetMoviesUseCase
 import com.example.imdbapp.data.domain.SearchMoviesUseCase
-import com.example.imdbapp.data.model.MovieModel
 import com.example.imdbapp.data.model.MovieResponse
 import kotlinx.coroutines.launch
 

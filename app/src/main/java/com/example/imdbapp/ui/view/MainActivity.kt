@@ -1,30 +1,29 @@
 package com.example.imdbapp.ui.view
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.imdbapp.data.model.MovieFavModel
+import androidx.room.Room
 import com.example.imdbapp.data.model.Results
+import com.example.imdbapp.data.room.DBMovies
+import com.example.imdbapp.data.room.MovieRoom
 import com.example.imdbapp.databinding.ActivityMainBinding
 import com.example.imdbapp.ui.MainAdapter
 import com.example.imdbapp.ui.viewmodel.MovieViewModel
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ktx.toObject
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity(), MainAdapter.OnClickListener {
     private lateinit var binding: ActivityMainBinding
     private val movieViewModel: MovieViewModel by viewModels()
-    private val db = FirebaseFirestore.getInstance()
+    private lateinit var room : DBMovies
 
     override fun onBackPressed() {}
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,8 +31,9 @@ class MainActivity : AppCompatActivity(), MainAdapter.OnClickListener {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         movieViewModel.onCreate()
-        setupRecyclerView()
         initListeners()
+        setupRecyclerView()
+        room = Room.databaseBuilder(this, DBMovies::class.java, "MovieRoom").build()
     }
 
     private fun initListeners() {
@@ -55,41 +55,28 @@ class MainActivity : AppCompatActivity(), MainAdapter.OnClickListener {
                 return false
             }
         })
-
-        binding.btnLogout.setOnClickListener {
-            logout()
-        }
         binding.btnFav.setOnClickListener {
 
-            val sharedPreferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE)
-            val email = sharedPreferences.getString("email", null)
-
-            val favIntent = Intent(this, FavsActivity::class.java).putExtra("userMail", email)
+            val favIntent = Intent(this, FavsActivity::class.java)
             startActivity(favIntent)
 
         }
     }
 
-    private fun logout() {
-        FirebaseAuth.getInstance().signOut()
-        val sharedPreferences = getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.apply {
-            putString("email", null)
-        }.apply()
-        val loginIntent = Intent(this, LoginActivity::class.java)
-        startActivity(loginIntent)
-    }
-
     private fun setupRecyclerView() {
         binding.rvMovies.layoutManager = LinearLayoutManager(this)
         movieViewModel.movieModel.observe(this, Observer { result ->
-            binding.rvMovies.adapter = result?.results?.toList()?.let { MainAdapter(this, it, this) }
+            binding.rvMovies.adapter =
+                result?.results?.toList()?.let { MainAdapter(this, it, this) }
         })
     }
 
     override fun onClick(movie: Results) {
-        Toast.makeText(this, "Pelicula ${movie.title} agregada a favoritos", Toast.LENGTH_LONG).show()
-       }
+        Toast.makeText(this, "Pelicula ${movie.title} agregada a favoritos", Toast.LENGTH_LONG)
+            .show()
+        lifecycleScope.launch {
+            room.daoMovie().addMovieRoom(MovieRoom(movie.title!!, movie.posterPath))
+        }
     }
+}
 

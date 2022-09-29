@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -43,7 +44,8 @@ class MainAdapter(
             Glide.with(context).load("https://image.tmdb.org/t/p/w500" + item.posterPath)
                 .into(itemView.findViewById(R.id.img_movie))
             itemView.findViewById<TextView>(R.id.txt_name).text = item.title
-            itemView.findViewById<ImageButton>(R.id.star_btn).setOnClickListener {
+            itemView.findViewById<ImageView>(R.id.star_btn).setOnClickListener {
+                it.setBackgroundResource(androidx.appcompat.R.drawable.abc_star_black_48dp)
                 clickListener.onClick(item)
             }
         }

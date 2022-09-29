@@ -17,7 +17,6 @@ class MovieRepository {
 
     suspend fun searchMovieByName(name: String) : MovieResponse? {
         val response = api.searchMovies(name)
-        Log.e("SEARCH LOG", response.toString())
         if (response != null) {
             MovieProvider.movies = response
         }
